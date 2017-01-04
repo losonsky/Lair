@@ -1,0 +1,59 @@
+/*
+* This file is part of Lair.
+*
+* Lair is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* Lair is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Lair. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+N_* Node
+S_* Server
+
+#################################################################################################
+#                               pairing over any wireless link                                  #
+#################################################################################################
+#                        Node                           #                Server                 #
+#################################################################################################
+# -S_pub saved during flash upload                      #                                       #
+# -generates N_UUID if not stored during flash upload   #                                       #
+#                                                       #                                       #
+# -generates temp. (N_priv + N_pub)                     #                                       #
+# -sends via S_pub ("pairing request" + N_UUID + N_pub) #                                       #
+#                                                       # -saves N_UUID                         #
+#                                                       # -generates AES128 key                 #
+#                                                       # -sends AES128 via N_pub               #
+# -receives/decodes AES128 key via N_priv               #                                       #
+# -saves N_UUID if not stored already during flashing   #                                       #
+#################################################################################################
+
+
+##############################################################################
+# table pdevice - pairing messages                                           #
+##############################################################################
+# Device ID  # Node UUID #   1st   #   2nd   #   3rd   #   4th   #  Paired   #
+#    id      #  N_UUID   #   p0    #   p1    #   p2    #   p3    #  paired   #
+#   uniq     #  36bytes  # 80bytes # 80bytes # 80bytes # 80bytes #    int    #
+##############################################################################
+
+##############################################################################
+# table adevice - active devices messages                                    #
+##############################################################################
+# Device ID  # Node UUID # AES128  # Seq Num  # from Node #  to Node # Score #
+#    id      #  N_UUID   # AES128  # seqnum   # fromnode  #  tonode  # score #
+#   uniq     #  36bytes  # 16bytes #   int    # 256bytes  # 256bytes #  int  #
+##############################################################################
+
+
+create table pdevice (id int auto_increment not null, primary key (id), N_UUID varchar(36), p0 varchar(80), p1 varchar(80), p2 varchar(80), p3 varchar(80), paired int, timestamp TIMESTAMP not null default CURRENT_TIMESTAMP);
+
+create table adevice (id int auto_increment not null, primary key (id), N_UUID varchar(36), AES128 varchar(16), seqnum int, fromnode varchar(256), tonode varchar(256), score int, timestamp TIMESTAMP not null default CURRENT_TIMESTAMP);
+
