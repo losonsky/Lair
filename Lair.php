@@ -144,7 +144,7 @@ for($i = 0; $i < count($arraydata); $i ++) {
   $msgheader = "L";
   $found = 0;
   while(($row = $query->fetch(PDO::FETCH_ASSOC)) && ($msghead != $msgheader)) {
-   $decdata = openssl_decrypt($data, 'aes-128-cbc', $row['AES128'], OPENSSL_RAW_DATA, $row['AES128']);
+   $decdata = openssl_decrypt($data, 'aes-128-cbc', hex2bin($row['AES128']), OPENSSL_RAW_DATA, hex2bin($row['AES128']));
    $arraydecdata = explode(" ", $decdata);
    $msghead = $arraydecdata[0];
    $seqnum = intval($arraydecdata[1]);
