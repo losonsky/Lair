@@ -55,5 +55,5 @@ S_* Server
 
 create table pdevice (id int auto_increment not null, primary key (id), N_UUID varchar(36), p0 varchar(80), p1 varchar(80), p2 varchar(80), p3 varchar(80), paired int, timestamp TIMESTAMP not null default CURRENT_TIMESTAMP);
 
-create table adevice (id int auto_increment not null, primary key (id), N_UUID varchar(36), AES128 varchar(16), seqnum int, fromnode varchar(256), tonode varchar(256), score int, timestamp TIMESTAMP not null default CURRENT_TIMESTAMP);
+create table adevice (id int auto_increment not null, primary key (id), N_UUID varchar(36), AES128 varchar(32), seqnum int, fromnode varchar(256), tonode varchar(256), score int, timestamp TIMESTAMP not null default CURRENT_TIMESTAMP);
 

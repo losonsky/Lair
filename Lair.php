@@ -141,7 +141,7 @@ for($i = 0; $i < count($arraydata); $i ++) {
   $query->execute();
   $decdata = "";
   $msghead = "";
-  $msgheader = "Lair";
+  $msgheader = "L";
   $found = 0;
   while(($row = $query->fetch(PDO::FETCH_ASSOC)) && ($msghead != $msgheader)) {
    $decdata = openssl_decrypt($data, 'aes-128-cbc', $row['AES128'], OPENSSL_RAW_DATA, $row['AES128']);
@@ -150,7 +150,8 @@ for($i = 0; $i < count($arraydata); $i ++) {
    $seqnum = intval($arraydecdata[1]);
    if($msghead == $msgheader) { // decoded data contains right msgheader
     $found = 1; // AES128 data decoded successfully
-    if(($seqnum > $row['seqnum']) && ($seqnum < (10 + $row['seqnum']))) { // right seqnum state
+//    if(($seqnum > $row['seqnum']) && ($seqnum < (10 + $row['seqnum']))) { // right seqnum state
+    if(1) { // right seqnum state
      $decdata = substr($decdata, 2 + strlen($msghead) + strlen($seqnum)); // cut redundant header data
      $score = $row['score'] + 1;
      $query = $db->prepare("update adevice set score = :field1, fromnode = :field2, seqnum = :field3, timestamp = NOW() where id = :field0");
@@ -195,7 +196,9 @@ for($i = 0; $i < count($arraydata); $i ++) {
       echo "\"{$row['timestamp']}\", \"{$row['fromnode']}\", \"{$row['tonode']}\"\n";
      }
     }
-   } // end of N_UUID string check
+   } else { // end of N_UUID string check
+    echo "debug: Lair webserver: unknown packet \"$base64encoded\"\n";
+   }
   } // end of other request type
  }
 }
