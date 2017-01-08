@@ -144,24 +144,26 @@ for($i = 0; $i < count($arraydata); $i ++) {
   $msgheader = "L";
   $found = 0;
   while(($row = $query->fetch(PDO::FETCH_ASSOC)) && ($msghead != $msgheader)) {
-   $decdata = openssl_decrypt($data, 'aes-128-cbc', hex2bin($row['AES128']), OPENSSL_RAW_DATA, hex2bin($row['AES128']));
+   $decdata = openssl_decrypt($base64encoded, 'aes-128-cbc', hex2bin($row['AES128']), OPENSSL_ZERO_PADDING, hex2bin($row['AES128']));
+   //echo "debug: Lair webserver: $decdata\n";
    $arraydecdata = explode(" ", $decdata);
    $msghead = $arraydecdata[0];
    $seqnum = intval($arraydecdata[1]);
    if($msghead == $msgheader) { // decoded data contains right msgheader
     $found = 1; // AES128 data decoded successfully
-//    if(($seqnum > $row['seqnum']) && ($seqnum < (10 + $row['seqnum']))) { // right seqnum state
-    if(1) { // right seqnum state
+    if(($seqnum > $row['seqnum']) && ($seqnum < (50 + $row['seqnum']))) { // right seqnum state
+//    if(1) { // right seqnum state
+     //echo "debug: the key has been found\n";
      $decdata = substr($decdata, 2 + strlen($msghead) + strlen($seqnum)); // cut redundant header data
      $score = $row['score'] + 1;
      $query = $db->prepare("update adevice set score = :field1, fromnode = :field2, seqnum = :field3, timestamp = NOW() where id = :field0");
      $query->bindParam(':field0', $row['id'], PDO::PARAM_INT);
      $query->bindParam(':field1', $score,     PDO::PARAM_INT);
      $query->bindParam(':field2', $decdata,   PDO::PARAM_STR);
-     $query->bindParam(':field3', $seqnum,   PDO::PARAM_INT);
+     $query->bindParam(':field3', $seqnum,    PDO::PARAM_INT);
      $query->execute();
      if($row['tonode'] != "") { // There is prepared tonode payload
-      $dataencrypted = openssl_encrypt("Lair ".$row['seqnum']." ".$row['tonode'], 'aes-128-cbc', $row['AES128'], OPENSSL_RAW_DATA, $row['AES128']);
+      $dataencrypted = openssl_encrypt("Lair ".$row['seqnum']." ".$row['tonode'], 'aes-128-cbc', hex2bin($row['AES128']), OPENSSL_ZERO_PADDING, hex2bin($row['AES128']));
       $base64dataencrypted = base64_encode($dataencrypted);
       $tonode = "";
       $query = $db->prepare("update adevice set tonode = :field1 where id = :field0");
@@ -169,10 +171,11 @@ for($i = 0; $i < count($arraydata); $i ++) {
       $query->bindParam(':field1', $tonode,    PDO::PARAM_STR);
       $query->execute();
       sleep(1);
-      echo "$base64dataencrypted";
+      echo "$base64dataencrypted"; // sending tonode message to GW
      }
+     echo "debug: Lair webserver: seqnum $seqnum";
     } else { // wrong seqnum
-     echo "debug: wrong seqnum $seqnum {$row['seqnum']}\n";
+     echo "debug: Lair webserver: wrong seqnum $seqnum {$row['seqnum']}\n";
     }
    }
   }
